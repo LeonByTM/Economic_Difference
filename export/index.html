@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HSLU Economic Dashboard</title>
+<style>
+  body{{font-family:'Segoe UI',Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 40px;color:#1a1a2e}}
+  h1{{color:#0a3d5c;border-bottom:3px solid #0a3d5c;padding-bottom:10px}}
+  .cards{{display:flex;gap:20px;flex-wrap:wrap;margin:28px 0}}
+  .card{{flex:1;min-width:200px;border-radius:10px;padding:18px 22px;text-decoration:none;color:inherit;
+          border:1px solid #e0e0e0;transition:box-shadow .15s}}
+  .card:hover{{box-shadow:0 4px 16px rgba(0,0,0,.12)}}
+  .card h3{{margin:0 0 8px;font-size:1.05rem}}
+  .card p{{margin:0;font-size:0.85rem;color:#555}}
+  table{{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.9rem}}
+  th{{background:#f0f4fa;text-align:left;padding:8px 12px;border:1px solid #ddd}}
+  td{{padding:8px 12px;border:1px solid #eee}}
+  code{{background:#f0f4fa;padding:1px 5px;border-radius:3px;font-size:0.85em}}
+</style>
+</head>
+<body>
+<h1>HSLU Economic Dashboard</h1>
+<p style="color:#555">HSLU MSc Applied Information &amp; Data Science — Macroeconomic Analysis of Asian Economies<br>
+<strong>Economies:</strong> China, Hong Kong SAR China, India, Singapore &nbsp;|&nbsp;
+<strong>Period:</strong> 2011–2020</p>
+
+<div class="cards">
+  <a class="card" href="page1_interest_rate_employment.html" style="border-top:4px solid #1a237e;background:#f5f7ff">
+    <h3 style="color:#1a237e">RQ 1 — Interest Rate &amp; Employment</h3>
+    <p>How do interest rate changes correlate with unemployment trends across Asian economies?</p>
+    <p style="margin-top:8px;color:#999;font-size:0.8rem">Persona: Ana Silva — Central Bank Policy Analyst</p>
+  </a>
+  <a class="card" href="page2_gdp_divergence.html" style="border-top:4px solid #1b5e20;background:#f5fff7">
+    <h3 style="color:#1b5e20">RQ 2 — GDP Divergence</h3>
+    <p>Which nations show the strongest divergence between GDP growth and unemployment rates?</p>
+    <p style="margin-top:8px;color:#999;font-size:0.8rem">Persona: Park Jun-ho — Economic Risk Researcher</p>
+  </a>
+  <a class="card" href="page3_population_growth.html" style="border-top:4px solid #880e4f;background:#fff5f9">
+    <h3 style="color:#880e4f">RQ 3 — Population &amp; Workforce</h3>
+    <p>How does interest rate volatility affect population growth and workforce employment?</p>
+    <p style="margin-top:8px;color:#999;font-size:0.8rem">Persona: Dr. Maria Stern — Professor of Macroeconomics</p>
+  </a>
+  <a class="card" href="page4_market_monitor.html" style="border-top:4px solid #e65100;background:#fff9f5">
+    <h3 style="color:#e65100">Market Monitor</h3>
+    <p>Daily equity indices, FX vs EUR, Brent Oil, US 10Y Yield, and VIX.</p>
+    <p style="margin-top:8px;color:#999;font-size:0.8rem">Contextual daily market data</p>
+  </a>
+</div>
+
+<h2 style="color:#0a3d5c">Data Inventory</h2>
+<table>
+  <tr><th>Dataset</th><th>Metrics</th><th>Coverage</th><th>Granularity</th></tr>
+  <tr><td><code>development_master</code></td><td>GDP Growth, Interest Rate, Unemployment, Population Growth</td><td>2011–2024 (IR: 2011–2020 for all 4)</td><td>Annual</td></tr>
+  <tr><td><code>market_master</code></td><td>Equity index closes, FX vs EUR</td><td>Daily</td><td>Daily</td></tr>
+  <tr><td><code>macro_master</code></td><td>Brent Oil, US 10Y Yield, VIX</td><td>Daily</td><td>Daily</td></tr>
+</table>
+</body>
+</html>
