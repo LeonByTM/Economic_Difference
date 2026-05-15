@@ -222,3 +222,23 @@ summary_table(view, agg_cols={
     "Avg Divergence Index": "Divergence Index",
 })
 
+# ── Conclusion ────────────────────────────────────────────────────────────────
+st.divider()
+st.markdown("""
+<div style='background:#e8f5e9; padding:20px 24px; border-radius:8px; margin-top:16px;'>
+  <h3 style='color:#1b5e20; margin-top:0;'>Conclusion — RQ 2: Which nations show the strongest divergence between GDP growth and unemployment rates?</h3>
+  <p style='font-size:15px; color:#222;'>
+    The divergence index (GDP Growth % − Unemployment Rate %) reveals that Asian economies are <b>not converging</b> in their macro performance — each follows a distinct growth-employment dynamic over 2011–2020.
+  </p>
+  <ul style='font-size:15px; color:#333; line-height:1.8;'>
+    <li><b>China</b> consistently leads in divergence: double-digit GDP growth far outpaced its already-low unemployment rate, reflecting the efficiency of state-directed investment and export-led industrialisation.</li>
+    <li><b>India</b> shows the weakest divergence — moderate GDP growth coexists with persistently high unemployment, exposing a structural gap between economic output and job creation, particularly in formal sectors.</li>
+    <li><b>Singapore and Hong Kong</b> occupy a middle position: tight labour markets keep unemployment low, but mature economies limit GDP growth headroom, producing moderate divergence scores.</li>
+    <li>The <b>2020 COVID-19 shock</b> compressed divergence across all economies as GDP growth collapsed, while unemployment responded with a lag — highlighting that GDP is a more immediate crisis indicator than unemployment data.</li>
+  </ul>
+  <p style='font-size:15px; color:#222;'>
+    <b>Answer:</b> <b>China</b> shows the strongest positive divergence, driven by high GDP growth relative to unemployment. <b>India</b> shows the weakest divergence, indicating that economic growth has not translated proportionally into employment gains — a key policy risk for an economy with a large young workforce.
+  </p>
+</div>
+""", unsafe_allow_html=True)
+

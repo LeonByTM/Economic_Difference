@@ -248,3 +248,23 @@ agg = {
 }
 summary_table(view, agg_cols=agg)
 
+# ── Conclusion ────────────────────────────────────────────────────────────────
+st.divider()
+st.markdown("""
+<div style='background:#fce4ec; padding:20px 24px; border-radius:8px; margin-top:16px;'>
+  <h3 style='color:#880e4f; margin-top:0;'>Conclusion — RQ 3: How has interest rate volatility affected population growth and workforce employment?</h3>
+  <p style='font-size:15px; color:#222;'>
+    Across the four Asian economies (2011–2020), interest rate volatility shows <b>a weak but directionally negative relationship</b> with both population growth and employment stability — though structural and demographic factors dominate over monetary conditions.
+  </p>
+  <ul style='font-size:15px; color:#333; line-height:1.8;'>
+    <li><b>India</b> exhibited the highest interest rate volatility, reflecting the Reserve Bank of India's frequent adjustments in response to inflation and currency pressures. Despite this, India maintained the highest population growth, suggesting demographics dwarf monetary influence on population dynamics.</li>
+    <li><b>Singapore</b> had the lowest population growth and minimal rate volatility, consistent with a mature, low-fertility economy where monetary stability supports but cannot reverse demographic trends.</li>
+    <li><b>China and Hong Kong</b> show that rate volatility coincided with moderate unemployment stability — central bank credibility and capital controls shielded labour markets from sharp monetary shocks.</li>
+    <li>Periods of <b>elevated IR volatility</b> (2013–2015, taper tantrum era) correlate with slightly weaker workforce absorption, but the effect is lagged and confounded by global trade cycles.</li>
+  </ul>
+  <p style='font-size:15px; color:#222;'>
+    <b>Answer:</b> Interest rate volatility has a <b>limited direct impact</b> on population growth — which is primarily driven by fertility rates and migration policy. Its effect on workforce employment is more visible: higher volatility introduces uncertainty that can suppress investment and hiring, particularly in export-dependent economies like Singapore and Hong Kong. Long-run demographic trends remain the dominant force.
+  </p>
+</div>
+""", unsafe_allow_html=True)
+

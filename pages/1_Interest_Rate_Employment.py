@@ -293,3 +293,23 @@ summary_table(view, agg_cols={
     "Avg Unemployment (%)": "Unemployment Rate (%)",
 })
 
+# ── Conclusion ────────────────────────────────────────────────────────────────
+st.divider()
+st.markdown("""
+<div style='background:#e8eaf6; padding:20px 24px; border-radius:8px; margin-top:16px;'>
+  <h3 style='color:#1a237e; margin-top:0;'>Conclusion — RQ 1: How do interest rate changes correlate with unemployment trends across Asian economies?</h3>
+  <p style='font-size:15px; color:#222;'>
+    Across China, Hong Kong, India, and Singapore (2011–2020), the relationship between interest rates and unemployment is <b>weak and heterogeneous</b> — no single monetary policy pattern reliably predicts labour market outcomes across all four economies.
+  </p>
+  <ul style='font-size:15px; color:#333; line-height:1.8;'>
+    <li><b>India</b> maintained the highest interest rates throughout the period, yet its labour market showed persistent structural unemployment, indicating that rate levels alone cannot resolve supply-side employment challenges.</li>
+    <li><b>Singapore</b> held near-zero rates with consistently low unemployment, reflecting a structurally tight labour market driven by skills policy rather than monetary conditions.</li>
+    <li><b>China and Hong Kong</b> show moderate and diverging correlations, suggesting that domestic fiscal policy and trade dynamics play a larger role than monetary policy in shaping employment outcomes.</li>
+    <li>The universal rate cuts in <b>2020</b> (COVID-19 response) confirm that central banks reacted symmetrically to the external shock, yet unemployment impacts differed significantly across economies.</li>
+  </ul>
+  <p style='font-size:15px; color:#222;'>
+    <b>Answer:</b> Interest rate changes show <b>limited and country-specific correlation</b> with unemployment across Asian economies. Monetary policy transmission to labour markets is mediated by structural factors — labour market flexibility, trade exposure, and institutional capacity — rather than rate levels alone.
+  </p>
+</div>
+""", unsafe_allow_html=True)
+

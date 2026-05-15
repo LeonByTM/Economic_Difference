@@ -159,3 +159,23 @@ if not macro.empty:
                       height=400, margin=dict(t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
 
+# ── Conclusion ────────────────────────────────────────────────────────────────
+st.divider()
+st.markdown("""
+<div style='background:#fff8e1; padding:20px 24px; border-radius:8px; margin-top:16px;'>
+  <h3 style='color:#e65100; margin-top:0;'>Conclusion — Market Monitor: How do global macro conditions interact with Asian equity and FX markets?</h3>
+  <p style='font-size:15px; color:#222;'>
+    The Market Monitor reveals that Asian equity indices and FX rates are <b>closely coupled with global macro indicators</b> — particularly Brent Oil, US 10-Year Yields, and VIX — confirming that these open economies are deeply integrated into global financial cycles.
+  </p>
+  <ul style='font-size:15px; color:#333; line-height:1.8;'>
+    <li><b>VIX spikes</b> (e.g. COVID-19 in 2020, taper tantrum in 2013) consistently coincide with equity sell-offs and FX depreciation across all four markets, confirming global risk-off behaviour overrides local fundamentals during crises.</li>
+    <li><b>Rising US 10Y yields</b> tend to pressure Asian FX rates against the EUR as capital flows shift toward US dollar assets — Singapore and Hong Kong, with USD-pegged or managed currencies, are most exposed to this dynamic.</li>
+    <li><b>Brent Oil</b> movements affect India most significantly due to its large energy import dependency; oil price drops (2014–2016, 2020) provided macroeconomic relief but also signalled global demand weakness.</li>
+    <li><b>Equity index performance</b> diverged most sharply in 2020: China's market recovered faster than Hong Kong and India, reflecting domestic fiscal stimulus and earlier COVID containment.</li>
+  </ul>
+  <p style='font-size:15px; color:#222;'>
+    <b>Answer:</b> Asian markets are significantly influenced by global macro conditions. Investors and policy analysts should monitor VIX, US yield trends, and oil prices as leading indicators of market stress across the region. Domestic macro fundamentals matter in calm periods, but global risk sentiment dominates during shocks.
+  </p>
+</div>
+""", unsafe_allow_html=True)
+
