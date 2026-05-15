@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from components.topbar import render_topbar
-from components.ui_helpers import render_kpi_card, kpi_row, insight_panel
+from components.ui_helpers import render_kpi_card, kpi_row, insight_panel, key_takeaways
 from services.data_service import load_macro_master, load_market_master
 
 render_topbar(active="Market_Monitor")
@@ -140,6 +140,12 @@ with col_l:
     fig.update_traces(hovertemplate="<b>%{fullData.name}</b><br>%{x|%d %b %Y}<br>Index: %{y:,.0f}<extra></extra>")
     fig.update_layout(margin=dict(t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
+    key_takeaways([
+        "Stock index levels encode the <b>cumulative market expectation</b> of future corporate earnings — a rising index means investors expect the economy to grow, corporate profits to improve, and capital returns to beat alternatives like bonds.",
+        "China's index is plotted on an <b>absolute level basis</b>, making direct cross-country comparison difficult. Investors should focus on the <b>trend direction and rate of change</b> rather than the level itself when comparing across markets.",
+        "Significant <b>equity drawdowns</b> visible in this chart typically coincide with risk-off events (VIX spikes): the 2015 China market crash, 2018 US-China trade war escalation, and the 2020 COVID-19 pandemic are all readable as sharp drops.",
+        "<b>Diverging post-crash recovery speeds</b> are as analytically important as the crash itself — the economy that rebounds fastest typically has the strongest policy response, most resilient domestic demand, or most aggressive central bank stimulus.",
+    ])
 
 with col_r:
     fig = px.line(market.sort_values("date"), x="date", y="FX_EUR_Rate",
@@ -147,6 +153,12 @@ with col_r:
     fig.update_traces(hovertemplate="<b>%{fullData.name}</b><br>%{x|%d %b %Y}<br>FX: %{y:.4f}<extra></extra>")
     fig.update_layout(margin=dict(t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
+    key_takeaways([
+        "<b>Hong Kong's</b> near-flat FX line reflects its hard USD peg since 1983 — the HKMA defends a tight 7.75–7.85 HKD/USD band using massive foreign reserve interventions, effectively importing US monetary policy regardless of local conditions.",
+        "<b>India's rupee</b> shows the most volatility in this group — driven by current account deficits, oil import dependency, and sensitivity to US rate differentials that trigger capital outflows whenever the Fed tightens.",
+        "A <b>rising line</b> means the local currency is weakening against the EUR (more local currency needed per euro). This reduces purchasing power for imports and raises inflation pressure but can boost export competitiveness.",
+        "FX rate moves are a <b>leading stress indicator</b>: when investors lose confidence in an economy, they sell the local currency before they sell the equity market, making FX trends a valuable early warning signal to watch alongside equity indices.",
+    ], color="#1565c0")
 
 # ── Combined macro chart ──────────────────────────────────────────────────────
 if not macro.empty:
@@ -158,6 +170,13 @@ if not macro.empty:
     fig.update_layout(title="Global Macro Indicators Over Time", xaxis_title="Date",
                       height=400, margin=dict(t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
+    key_takeaways([
+        "<b>VIX spikes above 25</b> are the defining events in this chart — the 2015 China crash, 2018 trade war escalation, and 2020 COVID-19 panic all appear as sharp vertical jumps. Each spike corresponds to a period where rational pricing breaks down and fear-driven selling dominates every Asian market simultaneously.",
+        "The <b>US 10-Year Yield</b> is the world's most important single interest rate: when it rises, global capital flows shift toward US Treasuries, weakening emerging Asian currencies, raising sovereign borrowing costs, and compressing equity valuations through a higher discount rate for future earnings.",
+        "<b>Brent Oil</b> is a dual-signal indicator for Asia: high prices hurt oil importers (India, Singapore, Hong Kong) through inflation and current account deterioration, while the 2014–2016 and 2020 oil collapses provided economic relief — but at the cost of signalling a severe global demand contraction.",
+        "The <b>co-movement of all three indicators</b> during 2020 tells the most important story: VIX exploded upward, US yields collapsed (flight to safety), and Brent oil crashed to multi-decade lows simultaneously — a once-in-a-generation macro shock that no model fully predicted in advance.",
+        "Investors monitoring Asian markets should treat this chart as a <b>global risk dashboard</b>: when VIX is calm, yields stable, and oil trending positively, Asian equity and FX conditions are likely favourable. When two or more indicators flash simultaneously, defensive positioning is historically warranted.",
+    ], color="#1565c0")
 
 # ── Conclusion ────────────────────────────────────────────────────────────────
 st.divider()

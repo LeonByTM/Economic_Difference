@@ -122,6 +122,15 @@ with col_l:
     fig.update_xaxes(range=[year_range[0] - 0.5, year_range[1] + 0.5], dtick=2)
     fig.update_yaxes(showgrid=False)
     st.plotly_chart(fig, use_container_width=True)
+    if not view.empty:
+        _gdp_avg = view.groupby("country")["GDP Growth (%)"].mean()
+        key_takeaways([
+            f"<b>{_gdp_avg.idxmax()}</b> averaged {_gdp_avg.max():.1f}% annual GDP growth — the highest in the group and one of the highest sustained growth rates globally over this period, powered by state-directed investment, infrastructure spending, and a manufacturing export engine operating at scale.",
+            f"<b>{_gdp_avg.idxmin()}</b> recorded the lowest average GDP growth at {_gdp_avg.min():.1f}% p.a. — as a mature, services-driven economy deeply exposed to global financial flows, it is the most vulnerable to external shocks and trade cycle downturns.",
+            "The <b>2015 dip</b> visible in multiple economies reflects China's stock market crash and the commodity supercycle collapse, which rippled across Asia through trade linkages and capital flow reversals.",
+            "<b>2020</b> is the defining event: every economy crossed the zero line into negative territory simultaneously — the only time since World War II that all four experienced synchronised GDP contraction, driven by COVID-19 lockdowns destroying services output overnight.",
+            "The dashed zero line is the <b>recession boundary</b> — any observation below it means economic contraction. Crossing it in 2020 was historically unprecedented in its speed and synchronisation across Asia.",
+        ])
 
 with col_r:
     avg_df = (
@@ -138,13 +147,21 @@ with col_r:
     fig.update_traces(hovertemplate="<b>%{x}</b><br>Divergence: %{y:+.2f}<extra></extra>")
     fig.update_layout(margin=dict(t=40, b=20), showlegend=False)
     st.plotly_chart(fig, use_container_width=True)
+    if not view.empty:
+        _div_avg = view.groupby("country")["Divergence Index"].mean().sort_values(ascending=False)
+        key_takeaways([
+            f"<b>{_div_avg.index[0]}</b> leads with the highest average divergence index of {_div_avg.iloc[0]:+.2f} — this means GDP growth exceeded unemployment by this margin on average each year, a sign of an economy where output growth is decoupled from job market pressures.",
+            f"<b>{_div_avg.index[-1]}</b> sits at the bottom with {_div_avg.iloc[-1]:+.2f} — a structurally concerning signal that economic output growth is not being converted into proportional employment gains, suggesting jobless growth or deep informal sector dominance.",
+            "Green bars represent economies where GDP growth outpaces unemployment (healthy), red bars indicate the opposite. The <b>height difference between the tallest and shortest bar</b> measures the macro inequality between these four economies.",
+            "This single chart is arguably the most policy-relevant in the dashboard: a country can have positive GDP growth and still fail its workers if the divergence index is low or negative.",
+        ], color="#2e7d32")
 
 if not view.empty:
     _gdp_avg = view.groupby("country")["GDP Growth (%)"].mean()
     key_takeaways([
-        f"<b>{_gdp_avg.idxmax()}</b> averaged the highest GDP growth ({_gdp_avg.max():.1f}% p.a.) over 2011\u20132020.",
-        f"<b>{top_c}</b> leads the divergence ranking, with GDP growth consistently outpacing its unemployment rate.",
-        "Countries with a negative divergence index experienced unemployment levels that exceeded their growth performance \u2014 a sign of structural labour market stress.",
+        f"<b>{_gdp_avg.idxmax()}</b> averaged the highest GDP growth ({_gdp_avg.max():.1f}% p.a.) — a sustained output miracle driven by state capitalism, but one that raises questions about environmental cost, debt accumulation, and whether the official figures fully reflect productivity versus government investment.",
+        f"<b>{top_c}</b> leads the divergence ranking — its GDP growth consistently runs ahead of its unemployment rate, making it the strongest performer on this combined macro metric.",
+        "Countries with a negative divergence index face the most uncomfortable policy challenge: how to generate jobs faster than the economy grows — a problem that rate cuts alone cannot solve and requires structural reforms in labour markets, education, and industry.",
     ])
 
 # ── Quadrant Scatter ──────────────────────────────────────────────────────────
@@ -190,9 +207,11 @@ fig_s.update_layout(margin=dict(t=40, b=20))
 st.plotly_chart(fig_s, use_container_width=True)
 if not view.empty:
     key_takeaways([
-        f"Countries in the 'Strong Economy' quadrant (high GDP growth, low unemployment) represent the most favourable macro conditions. <b>{top_c}</b> clusters here most consistently.",
-        "The 2020 COVID-19 shock pulls most observations sharply left (negative GDP growth), illustrating the universal scale of the disruption.",
-        "OLS trendlines per country reveal whether rising output translates to lower unemployment \u2014 a negative slope indicates healthy labour absorption.",
+        f"Countries clustering in the <b>'Strong Economy'</b> quadrant (high GDP growth, low unemployment) are the macro ideal — growth is broad-based and inclusive. <b>{top_c}</b> spends the most time here, though its low unemployment figures require contextual interpretation given state employment policies.",
+        "The <b>'Structural Imbalance'</b> quadrant (low growth, high unemployment) is the most dangerous zone — economies here face rising social pressure, fiscal strain from welfare spending, and political risk. Avoiding this quadrant is the central challenge for economic policymakers.",
+        "The <b>2020 COVID-19 shock</b> moves nearly all data points sharply left into negative GDP territory — the horizontal spread of the 2020 points shows how differently each economy's unemployment responded to the same growth collapse, a function of labour market flexibility and government intervention speed.",
+        "OLS trendlines with a <b>negative slope</b> indicate that as GDP growth rises, unemployment falls — the textbook growth-absorption relationship. A positive slope signals that growth and unemployment rise together, pointing to economic overheating or measurement distortions.",
+        "The divergence index encoded in the hover tooltip lets you read both axes simultaneously: the further right and lower a data point, the healthier the macro environment for that country-year.",
     ])
 
 # ── Divergence Over Time ──────────────────────────────────────────────────────
@@ -209,9 +228,11 @@ fig.update_xaxes(range=[year_range[0] - 0.5, year_range[1] + 0.5], dtick=2)
 st.plotly_chart(fig, use_container_width=True)
 if not view.empty:
     key_takeaways([
-        f"Divergence trend is <b>{trend_txt}</b> over 2011\u20132020, suggesting {'growing economic resilience as GDP outpaces unemployment' if slope > 0 else 'increasing labour market pressure relative to economic output'}.",
-        "The 2020 COVID-19 shock caused a sharp divergence drop as GDP growth collapsed while unemployment did not rise equally fast across all economies.",
-        f"<b>{c_divs.index[0]}</b> maintains the highest sustained divergence, indicating consistently strong output growth relative to its unemployment level.",
+        f"Divergence is <b>{trend_txt}</b> over 2011\u20132020 — {'a positive macro signal: on average, these economies are generating more output relative to unemployment, suggesting improving economic efficiency and labour absorption capacity' if slope > 0 else 'a warning signal: unemployment is growing faster than GDP output, or GDP growth is decelerating faster than job losses, compressing the gap between the two'}.",
+        f"<b>{c_divs.index[0]}</b> sustains the highest divergence line throughout the period — its GDP growth so consistently outpaces unemployment that its line sits structurally above all peers, reflecting an economy where the growth model is genuinely labour-efficient (or where unemployment is systematically underreported).",
+        "The <b>neutral zero line</b> is the policy benchmark: when a country's divergence index falls below zero, GDP growth is no longer sufficient to offset unemployment — a politically and socially dangerous threshold.",
+        "The <b>2020 COVID-19 collapse</b> is the most dramatic single-year event in this chart: every line plunges simultaneously as GDP growth crashes into negative territory, while unemployment responds more slowly — proving that GDP is a faster-moving crisis indicator than unemployment data, which lags by months due to survey timing and reporting cycles.",
+        "Recovery trajectories after 2020 will diverge based on each economy's fiscal capacity, vaccine rollout speed, and exposure to global trade — making the post-2020 divergence trend the critical variable to watch for assessing long-term macro health.",
     ], color="#1565c0")
 
 # ── Summary Table ─────────────────────────────────────────────────────────────

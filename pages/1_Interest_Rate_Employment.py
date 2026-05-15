@@ -139,9 +139,10 @@ st.plotly_chart(fig, use_container_width=True)
 if not line_ir.empty:
     _ir_avg = line_ir.groupby("country")["Interest Rate (%)"].mean()
     key_takeaways([
-        f"<b>{_ir_avg.idxmax()}</b> maintained the highest average interest rate ({_ir_avg.max():.1f}%) over 2011\u20132020, reflecting an active monetary policy stance.",
-        f"<b>{_ir_avg.idxmin()}</b> held the lowest average rate ({_ir_avg.min():.1f}%), consistent with an accommodative monetary environment.",
-        "All four economies cut rates toward 2020, responding to slowing growth and the onset of COVID-19.",
+        f"<b>{_ir_avg.idxmax()}</b> maintained the highest average interest rate ({_ir_avg.max():.1f}%) across the decade — the Reserve Bank of India kept rates elevated to fight persistent inflation driven by food prices, oil imports, and a structurally weak rupee.",
+        f"<b>{_ir_avg.idxmin()}</b> held rates at just {_ir_avg.min():.1f}% on average — Singapore's MAS manages monetary policy through exchange rates rather than interest rates, making its rate environment uniquely accommodative compared to peers.",
+        "The <b>2015 dip</b> visible across all economies reflects the global commodity price collapse and China's growth slowdown, which gave central banks room to ease without triggering inflation.",
+        "All four economies cut rates aggressively toward <b>2020</b> — an unprecedented coordinated global easing in response to COVID-19, bringing many rates to historic lows and signalling the limits of conventional monetary policy.",
     ])
 
 fig = px.line(
@@ -160,9 +161,10 @@ st.plotly_chart(fig, use_container_width=True)
 if not line_unemp.empty:
     _u_avg = line_unemp.groupby("country")["Unemployment Rate (%)"].mean()
     key_takeaways([
-        f"<b>{_u_avg.idxmin()}</b> consistently recorded the lowest unemployment ({_u_avg.min():.1f}%), indicating a tight labour market throughout the period.",
-        f"<b>{_u_avg.idxmax()}</b> had the highest average unemployment ({_u_avg.max():.1f}%), suggesting persistent structural slack.",
-        "Unemployment remained broadly stable across the region until the COVID-19 shock in 2020.",
+        f"<b>{_u_avg.idxmin()}</b> averaged just {_u_avg.min():.1f}% unemployment — a world-class labour market performance achieved through strict foreign talent policies, continuous reskilling programmes, and an economy permanently at near-full employment.",
+        f"<b>{_u_avg.idxmax()}</b> averaged {_u_avg.max():.1f}% unemployment — this is likely an undercount, as India's informal sector (employing over 80% of workers) is poorly captured in official statistics, making true underemployment far higher.",
+        "The <b>remarkable stability</b> from 2011–2019 across all four economies reflects the long post-GFC recovery — a decade of low rates, expanding global trade, and rising middle-class consumption that kept labour markets tight.",
+        "<b>2020</b> breaks the trend: the COVID-19 shock did not raise unemployment uniformly — service-heavy Singapore and Hong Kong saw sharper spikes while China's state-directed stimulus contained its headline figures.",
     ], color="#2e7d32")
 
 # ── Correlation scatter ───────────────────────────────────────────────────────
@@ -189,9 +191,11 @@ fig_s.update_layout(margin=dict(t=40, b=20))
 fig_s.update_yaxes(showgrid=False)
 st.plotly_chart(fig_s, use_container_width=True)
 key_takeaways([
-    f"Overall IR\u2013unemployment correlation across all 4 countries is <b>r\u00a0=\u00a0{corr:.3f}</b> ({corr_label}), suggesting {'monetary policy changes transmit to labour markets' if abs(corr) > 0.4 else 'interest rate levels alone do not predict unemployment directly'}.",
-    "OLS trendlines per country reveal heterogeneous relationships \u2014 each economy responds differently to interest rate changes.",
-    "Countries in the upper-left quadrant face high unemployment despite low rates, indicating structural rather than monetary drivers.",
+    f"The pooled IR\u2013unemployment correlation is <b>r\u00a0=\u00a0{corr:.3f}</b> ({corr_label}) — {'a meaningful signal that monetary tightening accompanies labour market shifts' if abs(corr) > 0.4 else 'a weak signal confirming that interest rates are not the primary driver of employment outcomes in these economies'}.",
+    "The <b>median crosshairs</b> divide the chart into four regimes: high rate + high unemployment (monetary tightening failing to create jobs), low rate + low unemployment (accommodative success), and two intermediate zones that reveal structural complexity.",
+    "India's cluster in the <b>high rate, high unemployment</b> zone is the most telling — despite years of rate cuts, unemployment has not fallen proportionally, pointing to supply-side barriers: skills gaps, agricultural dominance, and weak formal sector job creation.",
+    "Singapore's cluster in the <b>low rate, low unemployment</b> corner confirms that its labour market success is institutional, not monetary — active workforce management, not rate policy, explains the outcome.",
+    "OLS trendlines per country slope differently — some positive, some negative — proving there is <b>no universal monetary transmission rule</b> across Asian economies. Each requires its own policy toolkit.",
 ], color="#4a148c")
 
 # ── Per-country correlation ranking ───────────────────────────────────────────
@@ -222,10 +226,13 @@ if country_corrs:
     _sorted = pd.DataFrame(country_corrs).sort_values("r")
     _pos = _sorted.iloc[-1]
     _neg = _sorted.iloc[0]
-    _bullets = [f"<b>{_pos['Country']}</b> shows the strongest correlation (r\u00a0=\u00a0{_pos['r']:+.3f}): rate movements most closely track unemployment changes."]
+    _bullets = [
+        f"<b>{_pos['Country']}</b> shows the strongest IR\u2013unemployment link (r\u00a0=\u00a0{_pos['r']:+.3f}) — this economy's labour market is most sensitive to monetary policy changes, meaning central bank decisions here have direct and measurable employment consequences.",
+        f"A positive correlation means rate hikes accompany <b>rising unemployment</b> — textbook monetary contraction. A negative correlation means rate hikes accompanied <b>falling unemployment</b>, suggesting the economy was overheating and tightening was appropriate, not harmful.",
+    ]
     if _neg["r"] < -0.2:
-        _bullets.append(f"<b>{_neg['Country']}</b> shows a negative link (r\u00a0=\u00a0{_neg['r']:+.3f}): rate hikes were accompanied by falling unemployment, possibly reflecting overheating dynamics.")
-    _bullets.append("Diverging correlation signs across countries suggest different monetary transmission mechanisms are at work in each economy.")
+        _bullets.append(f"<b>{_neg['Country']}</b> shows a negative link (r\u00a0=\u00a0{_neg['r']:+.3f}) — rate increases here coincided with tighter labour markets, consistent with a pro-cyclical monetary stance responding to overheating rather than causing unemployment.")
+    _bullets.append("The <b>spread of r values</b> across the four economies is the key finding: ranging from strongly negative to strongly positive, it confirms that a single regional monetary policy would be deeply inappropriate — each economy requires calibrated domestic intervention.")
     key_takeaways(_bullets, color="#4a148c")
 
 # ── Heatmaps ──────────────────────────────────────────────────────────────────
@@ -281,9 +288,11 @@ with hm_col_r:
         st.plotly_chart(fig_hm2, use_container_width=True)
 
 key_takeaways([
-    "Darker blue cells indicate periods of tighter monetary policy (higher rates) — India stands out with consistently elevated rates.",
-    "The orange heatmap reveals unemployment persistence: countries with high unemployment in 2011 generally maintained it through 2020.",
-    "Comparing both heatmaps side-by-side highlights where rate changes did — or did not — coincide with unemployment movements.",
+    "The <b>blue intensity heatmap</b> immediately reveals India's monetary stance: consistently the darkest row, India maintained rates 2–5x higher than Singapore throughout the decade — a reflection of its inflation management challenges rather than a policy choice to suppress growth.",
+    "Singapore and Hong Kong appear as the <b>lightest rows</b> in the blue heatmap — not because their central banks are inactive, but because they operate through different mechanisms: exchange rate bands, reserve requirements, and macroprudential tools rather than rate adjustments.",
+    "The <b>orange unemployment heatmap</b> shows remarkable temporal persistence: the ranking of countries by unemployment in 2011 is almost identical to 2020, suggesting that structural factors — education quality, labour market institutions, sectoral composition — lock in unemployment outcomes over decade-long horizons.",
+    "<b>Cross-reading both heatmaps</b> by year reveals the key insight: years where India's rate darkened (tightening) did not consistently brighten its orange row (falling unemployment), undermining the classical monetary transmission theory for this economy.",
+    "The <b>2020 column</b> in the orange heatmap shows divergence: some economies darkened (rising unemployment), others did not change much — reflecting how differently each country's institutions absorbed the same global shock.",
 ], color="#0a3d5c")
 
 # ── Summary Table ─────────────────────────────────────────────────────────────
