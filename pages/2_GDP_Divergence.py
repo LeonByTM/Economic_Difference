@@ -156,14 +156,6 @@ with col_r:
             "This single chart is arguably the most policy-relevant in the dashboard: a country can have positive GDP growth and still fail its workers if the divergence index is low or negative.",
         ], color="#2e7d32")
 
-if not view.empty:
-    _gdp_avg = view.groupby("country")["GDP Growth (%)"].mean()
-    key_takeaways([
-        f"<b>{_gdp_avg.idxmax()}</b> averaged the highest GDP growth ({_gdp_avg.max():.1f}% p.a.) — a sustained output miracle driven by state capitalism, but one that raises questions about environmental cost, debt accumulation, and whether the official figures fully reflect productivity versus government investment.",
-        f"<b>{top_c}</b> leads the divergence ranking — its GDP growth consistently runs ahead of its unemployment rate, making it the strongest performer on this combined macro metric.",
-        "Countries with a negative divergence index face the most uncomfortable policy challenge: how to generate jobs faster than the economy grows — a problem that rate cuts alone cannot solve and requires structural reforms in labour markets, education, and industry.",
-    ])
-
 # ── Quadrant Scatter ──────────────────────────────────────────────────────────
 st.subheader("GDP Growth vs Unemployment — Economic Quadrants")
 med_x = view["GDP Growth (%)"].median()
