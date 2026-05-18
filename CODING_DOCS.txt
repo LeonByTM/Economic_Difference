@@ -1,0 +1,347 @@
+================================================================================
+CODING DOCUMENTATION — Economic Difference Dashboard
+HSLU MSc Applied Information & Data Science
+Project: Macroeconomic Comparative Analysis — Asia 2011–2020
+Authors: HSLU MSc ADS Group Project
+Version: 1.0  |  Last updated: May 2026
+================================================================================
+
+PURPOSE OF THIS DOCUMENT
+--------------------------------------------------------------------------------
+This file is the single source of truth for every coding decision made in this
+project. It documents the project architecture, coding conventions, component
+APIs, data pipeline, research questions, deployment process, and common errors.
+
+Any developer — human or AI — must read and follow this document before making
+any change to the codebase. Following these rules consistently reduces bugs,
+prevents regressions, and keeps the project maintainable.
+
+There is a companion file at .github/copilot-instructions.md which mirrors the
+key rules in a format that GitHub Copilot automatically loads. Both files must
+be kept in sync whenever rules change.
+
+Karpathy's principle applied here: "The more precisely you specify what you
+want, the fewer errors you get." This document is the specification.
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+Purpose:
+  Streamlit multi-page analytics dashboard analysing macroeconomic data
+  (2011-2020) across 4 Asian economies: China, Hong Kong SAR China, India,
+  Singapore.
+
+Data source:
+  AWS S3 — bucket: economic-warehouse-curated
+  All data access goes through services/data_service.py (never directly in pages)
+
+Entry point:
+  Overview.py  (used as: streamlit run Overview.py)
+
+Python version: 3.12
+Key libraries: streamlit, plotly, pandas, boto3, python-dotenv
+
+================================================================================
+2. FOLDER STRUCTURE
+================================================================================
+
+Economic Difference/
+|
+|-- Overview.py                   Entry point / landing page
+|-- requirements.txt              Python dependencies
+|-- .env                          Local secrets — NEVER COMMIT
+|-- .gitignore                    Excludes .env, __pycache__, data/raw, data/processed
+|-- CODING_DOCS.txt               This file
+|-- .github/
+|   |-- copilot-instructions.md   AI assistant rules (auto-loaded by Copilot)
+|
+|-- assets/
+|   |-- styles.css                Global CSS overrides applied via st.markdown
+|
+|-- charts/
+|   |-- __init__.py
+|   |-- base.py                   Reusable Plotly figure helpers
+|
+|-- components/
+|   |-- __init__.py
+|   |-- kpi_card.py               render_kpi_card() — returns HTML string for a KPI tile
+|   |-- sidebar.py                Sidebar navigation renderer
+|   |-- topbar.py                 Top navigation bar (render_topbar)
+|   |-- ui_helpers.py             key_takeaways(), insight_panel(), kpi_row(),
+|                                 summary_table(), add_events_to_fig(), COUNTRY_FLAGS,
+|                                 ECONOMIC_EVENTS
+|
+|-- config/
+|   |-- __init__.py
+|   |-- constants.py              COUNTRIES list, COLOR_MAP, YEAR_MIN, YEAR_MAX,
+|                                 economic event markers
+|   |-- settings.py               Loads .env vars — AWS keys, app title, credentials
+|
+|-- data/
+|   |-- raw/                      Raw S3 downloads (gitignored, keep .gitkeep)
+|   |-- processed/                Cleaned data (gitignored, keep .gitkeep)
+|   |-- samples/                  Mock data for local dev without AWS
+|
+|-- pages/
+|   |-- 1_Interest_Rate_Employment.py   RQ1 — Ana Silva, ECB Policy Analyst
+|   |-- 2_GDP_Divergence.py             RQ2 — Park Jun-ho, Economic Risk Researcher
+|   |-- 3_Population_Growth.py          RQ3 — Dr. Maria Stern, Professor of Macroeconomics
+|   |-- 4_Market_Monitor.py             Market Monitor — daily equity, FX, macro
+|
+|-- services/
+|   |-- __init__.py
+|   |-- auth_service.py           Login / session auth (APP_USERNAME / APP_PASSWORD)
+|   |-- data_service.py           load_development_master(), load_macro_master(),
+|                                 load_market_master()
+|   |-- s3_service.py             Raw boto3 S3 client wrapper
+|
+|-- utils/
+|   |-- __init__.py
+|   |-- formatters.py             Number/date formatting helpers
+|   |-- logger.py                 Logging setup
+|   |-- session.py                Streamlit session state helpers
+
+================================================================================
+3. DATA RULES
+================================================================================
+
+Loaders (always import from services/data_service.py):
+  load_development_master()  ->  GDP, Interest Rate, Unemployment, Population Growth
+  load_macro_master()        ->  Brent Oil, US10Y Yield, VIX (daily)
+  load_market_master()       ->  Stock Index Close, FX vs EUR (daily)
+
+After loading, always do:
+  df["country"] = df["country"].str.strip()
+
+Country filter (always exclude Japan):
+  countries = sorted(c for c in df["country"].unique() if c != "Japan")
+
+Year range for all research pages (RQ1, RQ2, RQ3):
+  year_range = (2011, 2020)
+  Do NOT change this unless explicitly asked.
+
+The 4 countries in scope:
+  China, Hong Kong SAR China, India, Singapore
+
+================================================================================
+4. COLOR MAP — NEVER CHANGE
+================================================================================
+
+color_map = {
+    "Singapore":           "#00aa55",   # Green
+    "China":               "#1f77b4",   # Blue
+    "Hong Kong SAR China": "#ff7f0e",   # Orange
+    "India":               "#d62728",   # Red
+}
+
+This color map must be defined at the top of every page file and passed to
+every Plotly figure via color_discrete_map=color_map.
+
+================================================================================
+5. PAGE STRUCTURE — EVERY RESEARCH PAGE MUST FOLLOW THIS ORDER
+================================================================================
+
+1. Imports
+2. render_topbar(active="...")
+3. st.title(...)
+4. st.caption(...)  — persona + research question + period
+5. Load data (load_development_master())
+6. Strip country whitespace
+7. Define color_map
+8. Filters (st.multiselect for countries, year_range fixed to 2011-2020)
+9. Filter dataframe to `view`
+10. KPI cards (kpi_row([render_kpi_card(...)]))
+11. insight_panel(...)  — summary bullets at top
+12. st.divider()
+13. Charts — each chart MUST be followed immediately by key_takeaways([...])
+14. summary_table(...)
+15. st.divider()
+16. Conclusion box (st.markdown with styled div — see Section 7)
+
+================================================================================
+6. COMPONENT USAGE
+================================================================================
+
+--- key_takeaways ---
+Import: from components.ui_helpers import key_takeaways
+Call: key_takeaways(["bullet 1", "bullet 2", "bullet 3"])
+Optional: key_takeaways([...], color="#1565c0")
+Rule: MUST be called after EVERY st.plotly_chart(). No exceptions.
+Bullets support <b>bold</b> HTML tags.
+
+--- insight_panel ---
+Import: from components.ui_helpers import insight_panel
+Call: insight_panel("Panel Title", ["bullet 1", "bullet 2"], color="#1a237e", bg="#e8eaf6")
+Rule: Used once per page near the top, after KPI cards.
+
+--- render_kpi_card + kpi_row ---
+Import: from components.ui_helpers import render_kpi_card, kpi_row
+Usage:
+  kpi_row([
+      render_kpi_card("Label", "Value", "ICON", delta=0.5, color="#2e7d32", bg="#f7fbf4"),
+      render_kpi_card("Label", "Value", "ICON"),
+  ])
+Rule: Used for all metric display blocks.
+
+--- summary_table ---
+Import: from components.ui_helpers import summary_table
+Call: summary_table(view, agg_cols={"Display Name": "Column Name", ...})
+Rule: Used once per page near the bottom, before conclusion.
+
+--- add_events_to_fig ---
+Import: from components.ui_helpers import add_events_to_fig
+Call: add_events_to_fig(fig)
+Rule: Always add to time-series line charts to mark economic events.
+
+--- render_topbar ---
+Import: from components.topbar import render_topbar
+Call: render_topbar(active="Interest_Rate_Employment")
+Active values: "Interest_Rate_Employment", "GDP_Divergence",
+               "Population_Growth", "Market_Monitor"
+
+================================================================================
+7. CONCLUSION BOX — TEMPLATE
+================================================================================
+
+Every research page ends with this pattern:
+
+st.divider()
+st.markdown("""
+<div style='background:#e8eaf6; padding:20px 24px; border-radius:8px; margin-top:16px;'>
+  <h3 style='color:#1a237e; margin-top:0;'>Conclusion — RQ X: [full question]</h3>
+  <p>[intro sentence]</p>
+  <ul>
+    <li><b>Country/finding</b> explanation.</li>
+    <li><b>Country/finding</b> explanation.</li>
+  </ul>
+  <p><b>Answer:</b> [direct answer to the research question]</p>
+</div>
+""", unsafe_allow_html=True)
+
+Rules:
+- No emojis in headings
+- No left border (no border-left CSS)
+- Background colors per page:
+    Page 1 (Interest Rate):  #e8eaf6  heading color: #1a237e
+    Page 2 (GDP Divergence): #e8f5e9  heading color: #1b5e20
+    Page 3 (Population):     #fce4ec  heading color: #880e4f
+    Page 4 (Market Monitor): #fff8e1  heading color: #e65100
+
+================================================================================
+8. RESEARCH QUESTIONS
+================================================================================
+
+Page 1 — Interest Rate & Employment
+  File:     pages/1_Interest_Rate_Employment.py
+  Persona:  Ana Silva — Central Bank Policy Analyst (ECB)
+  RQ:       How do interest rate changes correlate with unemployment trends
+            across Asian economies?
+  Topbar:   active="Interest_Rate_Employment"
+
+Page 2 — GDP Divergence
+  File:     pages/2_GDP_Divergence.py
+  Persona:  Park Jun-ho — Economic Risk Researcher
+  RQ:       Which nations show the strongest divergence between GDP growth
+            and unemployment rates?
+  Topbar:   active="GDP_Divergence"
+
+Page 3 — Population Growth
+  File:     pages/3_Population_Growth.py
+  Persona:  Dr. Maria Stern — Professor of Macroeconomics
+  RQ:       How has interest rate volatility affected population growth
+            and workforce employment?
+  Topbar:   active="Population_Growth"
+
+Page 4 — Market Monitor
+  File:     pages/4_Market_Monitor.py
+  Persona:  N/A — operational daily monitor
+  Purpose:  Daily equity indices, FX vs EUR, Brent Oil, US 10Y Yield, VIX
+  Topbar:   active="Market_Monitor"
+
+================================================================================
+9. CHART RULES
+================================================================================
+
+- All charts use Plotly Express or Plotly Graph Objects
+- Render with: st.plotly_chart(fig, use_container_width=True)
+- Always set: fig.update_layout(margin=dict(t=40, b=20))
+- Always set: fig.update_yaxes(showgrid=False) on line charts
+- For time-series: fig.update_xaxes(range=[year_min - 0.5, year_max + 0.5], dtick=2)
+- Always set hovertemplate (never use default hover)
+- For scatter with trendline: trendline="ols"
+- ALWAYS call key_takeaways([...]) immediately after st.plotly_chart(...)
+
+================================================================================
+10. SECURITY RULES
+================================================================================
+
+NEVER:
+  - Commit .env to git
+  - Hardcode any credential, key, token, or password in any Python file
+  - Push __pycache__/ or *.pyc files
+  - Log or print credential values
+
+ALWAYS:
+  - Load secrets via python-dotenv and os.getenv() (done in config/settings.py)
+  - Keep .env in .gitignore
+  - Remind user to refresh AWS session token when app shows credential errors
+    (token message: "AWS session expired. Update AWS_ACCESS_KEY_ID...")
+
+For deployment secrets use:
+  Streamlit Community Cloud -> App Settings -> Secrets (TOML format)
+  NOT environment variables in the repo
+
+================================================================================
+11. GIT WORKFLOW
+================================================================================
+
+Repos:
+  GitLab: https://gitlab.com/economic-difference/hslu-project-economic-difference
+  Branch: main
+
+Push steps:
+  git add .
+  git commit -m "descriptive message"
+  git remote set-url origin https://USERNAME:TOKEN@gitlab.com/economic-difference/hslu-project-economic-difference.git
+  git push origin main
+  git remote set-url origin https://gitlab.com/economic-difference/hslu-project-economic-difference.git
+  (reset URL after push to remove token from config)
+
+Streamlit Community Cloud:
+  Only supports GitHub — push to GitHub first, then deploy from there.
+  Add secrets in Streamlit dashboard under App Settings -> Secrets.
+
+Files that must NEVER be pushed:
+  .env
+  __pycache__/
+  *.pyc
+  data/raw/*  (except .gitkeep)
+  data/processed/*  (except .gitkeep)
+
+================================================================================
+12. COMMON ERRORS AND FIXES
+================================================================================
+
+ERROR: "AWS session expired..."
+FIX:   Go to AWS access portal -> Get credentials -> copy Option 1 commands
+       Update .env with new AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
+       AWS_SESSION_TOKEN. Restart Streamlit.
+
+ERROR: ModuleNotFoundError
+FIX:   pip install -r requirements.txt
+
+ERROR: Plotly chart missing color for a country
+FIX:   Check that df["country"].str.strip() was called. Country name may have
+       trailing whitespace that breaks the color_map lookup.
+
+ERROR: key_takeaways not found
+FIX:   Add to import: from components.ui_helpers import key_takeaways
+
+ERROR: Git push rejected (non-fast-forward)
+FIX:   git pull origin main --allow-unrelated-histories --no-edit
+       Resolve any conflicts, then git push origin main
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================

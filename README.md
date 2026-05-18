@@ -111,7 +111,7 @@ Economic Difference/
 3. Copy `.env.example` to `.env` and update the values.
 4. Run the app:
    ```bash
-   streamlit run app.py
+   streamlit run overview.py
    ```
 
 ## Recommended Future Additions
