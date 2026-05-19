@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError
 import pandas as pd
 import streamlit as st
 
@@ -10,12 +10,13 @@ _BUCKET = "economic-warehouse-curated"
 _CACHE_TTL = 3 * 3600  # 3 hours
 
 
+_CREDS_MSG = "Use the **🔑 Refresh AWS Credentials** panel in the sidebar to enter your temporary credentials."
+
+
 def _raise_user_friendly_aws_error(err: ClientError) -> None:
     code = err.response.get("Error", {}).get("Code")
-    if code == "ExpiredToken":
-        st.error(
-            "AWS session expired. Update AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN in .env with fresh temporary credentials, then restart Streamlit."
-        )
+    if code in ("ExpiredToken", "InvalidClientTokenId", "InvalidAccessKeyId", "AuthFailure", "SignatureDoesNotMatch"):
+        st.error(f"AWS credentials invalid or expired. {_CREDS_MSG}")
         st.stop()
     raise err
 
@@ -24,6 +25,9 @@ def _read(key: str) -> pd.DataFrame:
     svc = S3Service()
     try:
         resp = svc.client.get_object(Bucket=_BUCKET, Key=key)
+    except NoCredentialsError:
+        st.error(f"No AWS credentials found. {_CREDS_MSG}")
+        st.stop()
     except ClientError as err:
         _raise_user_friendly_aws_error(err)
     return pd.read_parquet(BytesIO(resp["Body"].read()))
@@ -57,7 +61,10 @@ def load_macro_master() -> pd.DataFrame:
                 part = pd.read_parquet(BytesIO(resp["Body"].read()))
                 part["date"] = pd.to_datetime(date_str)
                 frames.append(part)
-    except ClientError as err:
+    except (ClientError, NoCredentialsError) as err:
+        if isinstance(err, NoCredentialsError):
+            st.error(f"No AWS credentials found. {_CREDS_MSG}")
+            st.stop()
         _raise_user_friendly_aws_error(err)
     if not frames:
         return pd.DataFrame()
@@ -82,7 +89,10 @@ def load_market_master() -> pd.DataFrame:
                 part = pd.read_parquet(BytesIO(resp["Body"].read()))
                 part["date"] = pd.to_datetime(date_str)
                 frames.append(part)
-    except ClientError as err:
+    except (ClientError, NoCredentialsError) as err:
+        if isinstance(err, NoCredentialsError):
+            st.error(f"No AWS credentials found. {_CREDS_MSG}")
+            st.stop()
         _raise_user_friendly_aws_error(err)
     if not frames:
         return pd.DataFrame()

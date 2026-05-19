@@ -2,17 +2,19 @@ from io import BytesIO
 
 import boto3
 import pandas as pd
+import streamlit as st
 
 from config.settings import settings
 
 
 class S3Service:
     def __init__(self) -> None:
+        creds = st.session_state.get("aws_creds", {})
         self.client = boto3.client(
             "s3",
-            aws_access_key_id=settings.aws_access_key_id,
-            aws_secret_access_key=settings.aws_secret_access_key,
-            aws_session_token=settings.aws_session_token or None,
+            aws_access_key_id=creds.get("key_id") or settings.aws_access_key_id,
+            aws_secret_access_key=creds.get("secret") or settings.aws_secret_access_key,
+            aws_session_token=creds.get("token") or settings.aws_session_token or None,
             region_name=settings.aws_default_region,
         )
 

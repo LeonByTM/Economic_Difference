@@ -1,6 +1,6 @@
 """
-Market Monitor — Daily market_master + macro_master data.
-Stock index closes, FX vs EUR, Brent Oil, US 10Y Yield, VIX.
+Market Monitor — short-term country investment risk monitoring.
+Daily stock index closes, FX vs EUR, Brent Oil, US 10Y Yield, and VIX.
 """
 import pandas as pd
 import plotly.express as px
@@ -13,8 +13,8 @@ from services.data_service import load_macro_master, load_market_master
 
 render_topbar(active="Market_Monitor")
 
-st.title("🌍 Market Monitor")
-st.caption("Daily equity indices, FX rates vs EUR, Brent Oil, US 10Y Yield, and VIX across Asian economies.")
+st.title("🌍 Short-Term Country Investment Risk Monitor")
+st.caption("Investor-facing live view for EU-based capital allocators assessing short-term opportunities and risk across Asian markets using equity, FX, oil, rates, and volatility signals.")
 
 market = load_market_master()
 macro  = load_macro_master()
@@ -38,6 +38,18 @@ if market.empty:
 
 # ── Filters ──────────────────────────────────────────────────────────────────
 date_min, date_max = market["date"].min().date(), market["date"].max().date()
+
+insight_panel(
+    "Investor Context",
+    [
+        f"This page is a <b>short-horizon market pulse</b> built from live daily data spanning <b>{date_min.strftime('%d %b %Y')}</b> to <b>{date_max.strftime('%d %b %Y')}</b>.",
+        "It connects directly to the previous research pages: those pages explain the <b>structural fundamentals</b> behind each economy, while this page shows how those fundamentals are being <b>priced by markets right now</b>.",
+        "For an <b>EU-based investor</b>, this page is especially relevant because returns must be judged not only by local equity performance but also by <b>FX movements against the EUR</b>, which directly affect realised foreign-investment returns.",
+        "The purpose of this view is not long-cycle forecasting; it is to support <b>short-term country allocation decisions</b> by identifying which Asian markets currently look more resilient, more volatile, or more exposed to external macro pressure.",
+    ],
+    color="#1a237e",
+    bg="#e8eaf6",
+)
 
 f_col, c_col = st.columns([2, 2])
 with f_col:
@@ -120,14 +132,14 @@ if not macro.empty:
     kpi_row(macro_cards)
 
     # Insight
-    if vix is not None:
+    if vix is not None and brent is not None and us10y is not None:
         risk = "elevated" if vix > 25 else "moderate" if vix > 15 else "low"
         insight_panel("Market Conditions", [
             f"VIX at <b>{vix:.2f}</b> indicates <b>{risk}</b> market volatility / fear.",
             f"US 10Y Yield at <b>{us10y:.3f}%</b> — "
-            + ("tightening financial conditions." if (us10y or 0) > 4 else "relatively accommodative conditions."),
+            + ("tightening financial conditions." if us10y > 4 else "relatively accommodative conditions."),
             f"Brent crude at <b>${brent:.2f}</b> — "
-            + ("high energy costs may pressure inflation." if (brent or 0) > 90 else "energy costs within moderate range."),
+            + ("high energy costs may pressure inflation." if brent > 90 else "energy costs within moderate range."),
         ], color="#1a237e", bg="#e8eaf6")
 
 st.divider()
@@ -141,10 +153,11 @@ with col_l:
     fig.update_layout(margin=dict(t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
     key_takeaways([
-        "Stock index levels encode the <b>cumulative market expectation</b> of future corporate earnings — a rising index means investors expect the economy to grow, corporate profits to improve, and capital returns to beat alternatives like bonds.",
-        "China's index is plotted on an <b>absolute level basis</b>, making direct cross-country comparison difficult. Investors should focus on the <b>trend direction and rate of change</b> rather than the level itself when comparing across markets.",
-        "Significant <b>equity drawdowns</b> visible in this chart typically coincide with risk-off events (VIX spikes): the 2015 China market crash, 2018 US-China trade war escalation, and the 2020 COVID-19 pandemic are all readable as sharp drops.",
-        "<b>Diverging post-crash recovery speeds</b> are as analytically important as the crash itself — the economy that rebounds fastest typically has the strongest policy response, most resilient domestic demand, or most aggressive central bank stimulus.",
+        "Stock indices summarize the market's <b>current earnings and growth expectations</b>; over a short window, investors should focus on <b>relative direction, drawdown intensity, and recovery speed</b> rather than long-term valuation conclusions.",
+        "This directly extends the <b>GDP divergence</b> page: economies that looked more resilient in the historical macro analysis should, in a supportive market regime, also show stronger equity stability or faster recovery in the live window.",
+        "China's index is shown on an <b>absolute level basis</b>, so direct cross-country comparison is less useful than comparing <b>recent slope, stability, and recovery behaviour</b> across markets.",
+        "In this live window, the chart is most useful for spotting <b>which market is absorbing risk best</b> and which is reacting more sharply to changes in global sentiment.",
+        "For foreign investors, <b>dispersion across markets</b> matters as much as direction: when one market holds up while others weaken, it often signals stronger local resilience, better policy credibility, or a more attractive short-term risk-reward profile for international capital.",
     ])
 
 with col_r:
@@ -156,8 +169,9 @@ with col_r:
     key_takeaways([
         "<b>Hong Kong's</b> near-flat FX line reflects its hard USD peg since 1983 — the HKMA defends a tight 7.75–7.85 HKD/USD band using massive foreign reserve interventions, effectively importing US monetary policy regardless of local conditions.",
         "<b>India's rupee</b> shows the most volatility in this group — driven by current account deficits, oil import dependency, and sensitivity to US rate differentials that trigger capital outflows whenever the Fed tightens.",
-        "A <b>rising line</b> means the local currency is weakening against the EUR (more local currency needed per euro). This reduces purchasing power for imports and raises inflation pressure but can boost export competitiveness.",
-        "FX rate moves are a <b>leading stress indicator</b>: when investors lose confidence in an economy, they sell the local currency before they sell the equity market, making FX trends a valuable early warning signal to watch alongside equity indices.",
+        "A <b>rising line</b> means the local currency is weakening against the EUR (more local currency needed per euro). For an EU investor, that can <b>reduce euro-denominated returns</b> even when the local equity market is rising.",
+        "This extends the <b>interest rate and employment</b> analysis: monetary conditions do not only affect domestic labour markets, they also affect currency stability, which is critical for foreign investors measuring returns in EUR or USD terms.",
+        "FX moves are a <b>real-time stress indicator</b>: over a short horizon, currency weakness often shows risk aversion faster than equity indices, making this chart valuable as an early warning signal before increasing country exposure.",
     ], color="#1565c0")
 
 # ── Combined macro chart ──────────────────────────────────────────────────────
@@ -167,33 +181,35 @@ if not macro.empty:
     for col in macro_cols:
         fig.add_trace(go.Scatter(x=macro["date"], y=macro[col], name=col, mode="lines",
                                   hovertemplate=f"{col}: %{{y:.2f}}<br>%{{x|%d %b %Y}}<extra></extra>"))
-    fig.update_layout(title="Global Macro Indicators Over Time", xaxis_title="Date",
+    fig.update_layout(title="Global Macro Indicators - Recent Trend", xaxis_title="Date",
                       height=400, margin=dict(t=40, b=20))
     st.plotly_chart(fig, use_container_width=True)
     key_takeaways([
-        "<b>VIX spikes above 25</b> are the defining events in this chart — the 2015 China crash, 2018 trade war escalation, and 2020 COVID-19 panic all appear as sharp vertical jumps. Each spike corresponds to a period where rational pricing breaks down and fear-driven selling dominates every Asian market simultaneously.",
-        "The <b>US 10-Year Yield</b> is the world's most important single interest rate: when it rises, global capital flows shift toward US Treasuries, weakening emerging Asian currencies, raising sovereign borrowing costs, and compressing equity valuations through a higher discount rate for future earnings.",
-        "<b>Brent Oil</b> is a dual-signal indicator for Asia: high prices hurt oil importers (India, Singapore, Hong Kong) through inflation and current account deterioration, while the 2014–2016 and 2020 oil collapses provided economic relief — but at the cost of signalling a severe global demand contraction.",
-        "The <b>co-movement of all three indicators</b> during 2020 tells the most important story: VIX exploded upward, US yields collapsed (flight to safety), and Brent oil crashed to multi-decade lows simultaneously — a once-in-a-generation macro shock that no model fully predicted in advance.",
-        "Investors monitoring Asian markets should treat this chart as a <b>global risk dashboard</b>: when VIX is calm, yields stable, and oil trending positively, Asian equity and FX conditions are likely favourable. When two or more indicators flash simultaneously, defensive positioning is historically warranted.",
+        "<b>VIX</b>, <b>US 10-Year Yield</b>, and <b>Brent Oil</b> are the three fastest ways to read the current macro backdrop: volatility, global discount rates, and energy cost pressure.",
+        "When the <b>US 10-Year Yield</b> rises, global capital can rotate toward US assets, which typically tightens financial conditions for Asian markets and puts pressure on risk assets and currencies.",
+        "<b>Brent Oil</b> matters disproportionately for Asian importers: higher oil prices can feed inflation and squeeze margins, while lower oil prices can ease cost pressure but may also reflect weaker global demand.",
+        "This links back to the <b>population growth and workforce</b> page: economies with stronger labour absorption and demographic support are generally better positioned to absorb external macro shocks over time, while this chart shows whether markets are currently rewarding that resilience.",
+        "For investors, the main value here is <b>co-movement</b>: if volatility, yields, and oil all move against risk assets at the same time, the regional backdrop is becoming less supportive for fresh foreign allocations.",
+        "This chart should be read as a <b>live country-risk dashboard</b>, not a long-history study; it helps investors assess the immediate environment in which Asian equities and FX are trading.",
     ], color="#1565c0")
 
 # ── Conclusion ────────────────────────────────────────────────────────────────
 st.divider()
 st.markdown("""
 <div style='background:#fff8e1; padding:20px 24px; border-radius:8px; margin-top:16px;'>
-  <h3 style='color:#e65100; margin-top:0;'>Conclusion — Market Monitor: How do global macro conditions interact with Asian equity and FX markets?</h3>
+    <h3 style='color:#e65100; margin-top:0;'>Conclusion — Why This Page Matters for Foreign Investors</h3>
   <p style='font-size:15px; color:#222;'>
-    The Market Monitor reveals that Asian equity indices and FX rates are <b>closely coupled with global macro indicators</b> — particularly Brent Oil, US 10-Year Yields, and VIX — confirming that these open economies are deeply integrated into global financial cycles.
+      This page adds value for investors because it translates the dashboard from a purely historical research product into a <b>live country investment risk monitor</b>. Pages 1–3 explain <b>why these economies matter fundamentally</b>; this page shows <b>how those fundamentals are currently being priced</b> in equities, FX, and macro-sensitive indicators.
   </p>
   <ul style='font-size:15px; color:#333; line-height:1.8;'>
-    <li><b>VIX spikes</b> (e.g. COVID-19 in 2020, taper tantrum in 2013) consistently coincide with equity sell-offs and FX depreciation across all four markets, confirming global risk-off behaviour overrides local fundamentals during crises.</li>
-    <li><b>Rising US 10Y yields</b> tend to pressure Asian FX rates against the EUR as capital flows shift toward US dollar assets — Singapore and Hong Kong, with USD-pegged or managed currencies, are most exposed to this dynamic.</li>
-    <li><b>Brent Oil</b> movements affect India most significantly due to its large energy import dependency; oil price drops (2014–2016, 2020) provided macroeconomic relief but also signalled global demand weakness.</li>
-    <li><b>Equity index performance</b> diverged most sharply in 2020: China's market recovered faster than Hong Kong and India, reflecting domestic fiscal stimulus and earlier COVID containment.</li>
+      <li><b>Short-horizon data is still decision-useful</b> when the objective is to assess present market tone, relative resilience, and cross-asset confirmation rather than to estimate structural relationships.</li>
+      <li><b>Equity, FX, and macro indicators together</b> give foreign investors a practical read on whether the region is currently trading in a risk-on, neutral, or defensive regime.</li>
+      <li><b>Currency moves matter directly to EU-based investors</b>: even if a local equity market performs well, FX weakness against the EUR can materially reduce realised returns.</li>
+      <li><b>Cross-country dispersion</b> remains informative even in a short window: when one market or currency weakens materially faster than peers, it can signal higher vulnerability, weaker sentiment, or less attractive foreign-capital conditions.</li>
+      <li><b>This page completes the investment story</b>: the earlier pages justify why the countries deserve attention, and this page helps decide where near-term risk appears most manageable for foreign capital.</li>
   </ul>
   <p style='font-size:15px; color:#222;'>
-    <b>Answer:</b> Asian markets are significantly influenced by global macro conditions. Investors and policy analysts should monitor VIX, US yield trends, and oil prices as leading indicators of market stress across the region. Domestic macro fundamentals matter in calm periods, but global risk sentiment dominates during shocks.
+      <b>Answer:</b> Yes, this page makes sense for foreign investors when positioned correctly: the earlier pages establish the <b>investment case</b> through structural macro analysis, while this page helps assess <b>current timing, market sentiment, and currency risk</b>. Together, they support a more complete investment view: <b>why to consider these Asian markets</b>, <b>which ones look more resilient right now</b>, and <b>what external risks could affect euro-based returns</b>.
   </p>
 </div>
 """, unsafe_allow_html=True)
